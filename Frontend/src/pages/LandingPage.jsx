@@ -1,18 +1,7 @@
-import React, { Suspense } from 'react'
-import { Canvas } from '@react-three/fiber'
-import { OrbitControls, useGLTF } from '@react-three/drei'
-import { Center } from '@react-three/drei'
+
 import mapbg from '../Images/map-bg.png';
 
 
-function Drone() {
-    const { scene } = useGLTF('/models/drone.glb')
-    return (
-        <Center>
-            <primitive object={scene} scale={1} />
-        </Center>
-    )
-}
 
 function LandingPage() {
     return (
@@ -22,15 +11,13 @@ function LandingPage() {
                 src={mapbg}
                 className="absolute inset-0 z-0 w-full h-full object-cover pointer-events-none opacity-80"
             />
-            
+
             <div className="absolute inset-0 bg-[linear-gradient(rgba(147,51,234,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(147,51,234,0.1)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black,transparent)] pointer-events-none z-0"></div>
 
-            
-
-            <div className='grid grid-cols-2 z-10 p-4 w-full h-full '>
+            <div className='grid grid-cols-5 z-10 p-4 w-full h-full '>
 
                 {/* col 1 */}
-                <div className="flex flex-col justify-center gap-10 px-16">
+                <div className="col-span-2 flex flex-col justify-center pl-5 gap-10 lg:mt-9 ">
 
                     <h1 className="text-6xl font-extrabold leading-tight">
                         From Aerial Images
@@ -55,32 +42,9 @@ function LandingPage() {
                 </div>
 
                 {/* col 2 */}
-                <div className="relative flex items-center justify-center">
+                <div className="col-span-3 ">
 
-                    <Canvas shadows camera={{ position: [0, 5, 6], fov: 50 }} className='w-full h-full z-10 items-center'>
-                        {/* Lighting */}
-                        <ambientLight intensity={0.6} />
-                        <directionalLight position={[5, 5, 5]} intensity={1} />
-                        <directionalLight position={[-5, 5, -5]} intensity={0.5} />
 
-                        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.2, 0]}>
-                            <planeGeometry args={[10, 10]} />
-                            <shadowMaterial opacity={0.25} />
-                        </mesh>
-
-                        {/* Model */}
-                        <Suspense fallback={null}>
-                            <Drone />
-                        </Suspense>
-
-                        {/* Controls */}
-                        <OrbitControls
-                            enableZoom={false}
-                            enablePan={false}
-                            autoRotate
-
-                        />
-                    </Canvas>
                 </div>
             </div>
         </div>

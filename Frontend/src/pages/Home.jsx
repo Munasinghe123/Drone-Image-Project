@@ -1,7 +1,7 @@
 import React, { useRef } from 'react'
 import LandingPage from './LandingPage'
 import DroneScene from '../components/Drone'
-import HowItWorks from './HowItWorks'
+import Features from './Features'
 
 function Home() {
     const howItWorksRef = useRef(null)
@@ -10,7 +10,7 @@ function Home() {
         <div>
             <DroneScene targetRef={howItWorksRef} />
             <LandingPage />
-            <HowItWorks ref={howItWorksRef} />
+            <Features ref={howItWorksRef} />
         </div>
     )
 }

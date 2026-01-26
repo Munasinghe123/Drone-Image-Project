@@ -20,12 +20,12 @@ function LandingPage() {
                 <div className="col-span-2 flex flex-col justify-center pl-5 gap-10 lg:mt-9 ">
 
                     <h1 className="text-6xl font-extrabold leading-tight">
-                        From Aerial Images
+                        <span className="text-purple-700">From Aerial Images</span>
                         <br />
                         <span className="text-purple-700">to Actionable Insights</span>
                     </h1>
 
-                    <p className="text-lg text-gray-600 max-w-xl">
+                    <p className="text-lg  max-w-xl">
                         Drone-based image capture and intelligent data analysis to enable
                         safer, faster, and more accurate powerline inspections.
                     </p>

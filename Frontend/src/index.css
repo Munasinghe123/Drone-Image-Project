@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+body {
+  overflow-x: hidden;
+}
+
+
 .perspective {
   perspective: 1000px;
 }
@@ -14,4 +19,23 @@
 
 .rotate-y-180 {
   transform: rotateY(180deg);
+}
+
+.nav-link {
+  @apply relative text-sm font-medium text-purple-700/80 transition-colors duration-300 hover:text-purple-700;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  height: 2px;
+  width: 0;
+  background-color: rgb(168 85 247);
+  transition: width 0.3s ease;
+}
+
+.group:hover .nav-link::after {
+  width: 100%;
 }

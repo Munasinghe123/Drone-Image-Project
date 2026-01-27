@@ -14,15 +14,15 @@ const Features = forwardRef((props, ref) => {
 
     gsap.set(textRef.current, { opacity: 0 })
 
-    ScrollTrigger.create({
+    const trigger = ScrollTrigger.create({
       trigger: sectionRef.current,
-      start: 'top 50%',      
+      start: 'top 50%',
       end: 'bottom top',
       onEnter: () => gsap.to(textRef.current, { opacity: 1, duration: 0.4 }),
       onLeaveBack: () => gsap.to(textRef.current, { opacity: 0, duration: 0.3 }),
     })
 
-    return () => ScrollTrigger.getAll().forEach(t => t.kill())
+    return () => trigger.kill()
   }, [])
 
   return (
@@ -31,7 +31,7 @@ const Features = forwardRef((props, ref) => {
         sectionRef.current = node
         if (ref) ref.current = node
       }}
-      className="relative min-h-screen bg-purple-50"
+      className="relative overflow-hidden"
     >
       <div
         ref={textRef}
@@ -46,6 +46,7 @@ const Features = forwardRef((props, ref) => {
       </div>
 
       <StackedCards />
+      <div style={{ height: "100vh" }} />
     </section>
   )
 })

@@ -1,59 +1,90 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Logo from '../Images/Leco.png'
 import { Link } from 'react-router-dom'
+import { MoveRight } from 'lucide-react'
 
 function Header() {
-  const [open, setOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12)
+    window.addEventListener('scroll', onScroll)
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   return (
-    <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-7xl">
-      <div className="h-20 px-8 flex items-center justify-between 
-                      bg-purple-800/90 backdrop-blur-xl
-                      rounded-full shadow-2xl">
+    <header
+      className={`
+        fixed top-0 left-0 z-50 w-full
+        transition-all duration-300
+        ${scrolled
+          ? 'backdrop-blur-3xl '
+          : 'bg-transparent'}
+      `}
+    >
+      <div className="h-16 px-10 flex items-center justify-between">
 
         <Link to="/">
-          <div className="flex items-center space-x-3 group cursor-pointer">
-            
-            <div className="h-12 w-12 rounded-2xl 
-                    bg-white flex items-center justify-center
-                    shadow-md group-hover:shadow-purple-400/50
-                    transition-all duration-300">
-
-              <img
-                src={Logo}
-                alt="SkyEye Logo"
-                className="h-7 w-7"
-              />
-            </div>
-
-            <div className="flex flex-col leading-none">
-              <span className="text-white font-extrabold tracking-widest text-lg">
-                SKY<span className="text-purple-300">EYE</span>
-              </span>
-              <span className="text-purple-200 text-xs tracking-wider">
-                Grid Intelligence
-              </span>
-            </div>
-
+          <div className="flex items-center gap-3 group cursor-pointer">
+            <img
+              src={Logo}
+              alt="SkyEye Logo"
+              className="
+                h-10 w-10 rounded-xl
+                transition-transform duration-300
+              "
+            />
+            <span className="font-extrabold tracking-widest text-lg text-purple-700">
+              SKY<span className="text-purple-500">EYE</span>
+            </span>
           </div>
         </Link>
 
+        <nav className="hidden md:flex items-center gap-20">
 
-        {/* Actions */}
-        <div className="flex items-center space-x-4">
-          <Link to="/login">
-            <button
-              className="bg-white text-purple-800 font-semibold
-                         px-6 py-2 rounded-full
-                         hover:bg-purple-100 transition-all duration-300"
-            >
-              Login
-            </button>
+          <Link to="/product" className="group">
+            <span className="nav-link">Product</span>
           </Link>
-        </div>
+
+          <Link to="/solutions" className="group">
+            <span className="nav-link">Solutions</span>
+          </Link>
+
+          <Link to="/how-it-works" className="group">
+            <span className="nav-link">How it works</span>
+          </Link>
+
+          <Link to="/pricing" className="group">
+            <span className="nav-link">Pricing</span>
+          </Link>
+
+          <Link to="/contact" className="group">
+            <span className="nav-link">Contact</span>
+          </Link>
+
+        </nav>
+
+
+        {/* CTA */}
+        <Link to="/signin">
+          <button
+            className="
+              group flex items-center gap-2
+              px-5 py-2 rounded-full
+              bg-purple-700 text-white
+              text-sm font-semibold
+              transition-all duration-300
+              hover:bg-purple-600
+              hover:scale-105
+            "
+          >
+            Sign in
+            <MoveRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </button>
+        </Link>
 
       </div>
-    </div>
+    </header>
   )
 }
 

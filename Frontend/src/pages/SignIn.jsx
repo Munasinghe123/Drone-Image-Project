@@ -9,6 +9,8 @@ import toast from 'react-hot-toast';
 // import { useDispatch }  from 'react-redux';
 // import { loginSuccess } from '../../redux/userSlice';
 import { useNavigate } from 'react-router-dom';
+import HeroBackground from '../Images/map-bg.png';
+
 
 export default function SignIn() {
 
@@ -102,11 +104,11 @@ export default function SignIn() {
         <div className="flex items-center justify-center min-h-screen relative py-10">
 
             {/* Background */}
-            {/* <img
+            <img
                 src={HeroBackground}
                 className="absolute inset-0 -z-10 w-full h-full object-cover"
                 alt="Background"
-            /> */}
+            />
 
             {/* MAIN CARD */}
             <div className="relative w-[900px] max-w-[95%]  lg:mt-20 h-[500px] border border-purple-400 backdrop-blur-xl rounded-4xl overflow-hidden shadow-2xl">
@@ -207,6 +209,7 @@ export default function SignIn() {
                         >
                             {isLogin ? (
                                 <div className="text-center">
+                                    <img/>
                                     <h2 className="text-3xl font-bold mb-4">You don't have an account?</h2>
                                     <p className="mb-6 text-white">Register with your personal details to use all features.</p>
                                     <button onClick={() => setIsLogin(false)} className="px-6 py-2 text-lg border-2 border-white rounded-md hover:bg-white hover:text-purple-700 transition-colors w-2xs">Register</button>

@@ -20,7 +20,7 @@ function LandingPage() {
                 <div className="col-span-2 flex flex-col justify-center pl-5 gap-10 lg:mt-9 ">
 
                     <h1 className="text-6xl font-extrabold leading-tight">
-                        <span className="text-purple-700">From Aerial Images</span>
+                        <span className="text-black">From Aerial Images</span>
                         <br />
                         <span className="text-purple-700">to Actionable Insights</span>
                     </h1>

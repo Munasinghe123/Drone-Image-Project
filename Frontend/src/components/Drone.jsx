@@ -8,10 +8,10 @@ function Drone({ scrollY, targetTop }) {
     const ref = useRef()
 
     // Starting position (RIGHT side)
-    const base = useRef(new THREE.Vector3(2.5, -1.5, 0))
-    
+    const base = useRef(new THREE.Vector3(2.5, -1, 0))
+
     // End position (LEFT side of features page)
-    const target = new THREE.Vector3(-3, -0.6, 0)
+    const target = new THREE.Vector3(-5, -3, 0)
 
     useFrame((state) => {
         if (!ref.current) return
@@ -31,7 +31,7 @@ function Drone({ scrollY, targetTop }) {
 
         if (progress < 1) {
             // === FLOATING + FLYING ===
-            
+
             // Original floating position (with your motion values)
             const floatPos = new THREE.Vector3(
                 base.current.x + Math.sin(t * 0.4) * motion, // Float decreases as we fly
@@ -48,23 +48,24 @@ function Drone({ scrollY, targetTop }) {
 
             // Banking animation (gets stronger as progress increases)
             ref.current.rotation.z = Math.sin(t * 0.2) * 0.03 * motion + // Original gentle rotation
-                                      Math.sin(progress * Math.PI) * 0.4 * progress // Banking increases with progress
-            
+                Math.sin(progress * Math.PI) * 0.4 * progress // Banking increases with progress
+
             // Yaw (turn left) during flight
             ref.current.rotation.y = progress * 0.5
-            
+
         } else {
             // === ARRIVED: Settled on LEFT ===
             ref.current.position.copy(target)
-            
+
             // Gentle hover when arrived
             ref.current.position.y = target.y + Math.sin(t * 1.5) * 0.05
-            
+
             ref.current.rotation.set(0, 0.3, 0) // Look toward cards
         }
     })
 
-    return <primitive ref={ref} object={scene} scale={0.8} />
+    //loads the drone 
+    return <primitive ref={ref} object={scene} scale={0.9} />
 }
 
 export default function DroneScene({ targetRef }) {

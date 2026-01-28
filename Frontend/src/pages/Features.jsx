@@ -2,6 +2,7 @@ import { forwardRef, useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import StackedCards from '../components/StackedCards'
+import Bg from '../Images/map-bg.png'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -16,7 +17,7 @@ const Features = forwardRef((props, ref) => {
 
     const trigger = ScrollTrigger.create({
       trigger: sectionRef.current,
-      start: 'top 50%',
+      start: 'top 20%',
       end: 'bottom top',
       onEnter: () => gsap.to(textRef.current, { opacity: 1, duration: 0.4 }),
       onLeaveBack: () => gsap.to(textRef.current, { opacity: 0, duration: 0.3 }),
@@ -31,19 +32,31 @@ const Features = forwardRef((props, ref) => {
         sectionRef.current = node
         if (ref) ref.current = node
       }}
-      className="relative overflow-hidden"
+      className="relative overflow-hidden bg-purple-50"
     >
+      
       <div
         ref={textRef}
-        className="fixed left-10 md:left-20 top-1/2 -translate-y-1/2 z-20 max-w-md pointer-events-none"
+        className="fixed left-10 md:left-20 top-28 z-20 max-w-sm pointer-events-none"
       >
-        <h2 className="text-4xl md:text-5xl font-bold text-black mb-4">
+        <span className="block text-sm uppercase tracking-widest text-purple-500 mb-3">
           Features
+        </span>
+
+        <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-black mb-6">
+          Built for modern <span className='text-purple-700'>inspection </span> 
         </h2>
-        <p className="text-purple-700 text-base md:text-lg">
-          Intelligent solutions for modern infrastructure inspection
+
+        <div className="w-12 h-[2px] bg-black rounded-full mb-6" />
+
+        <p className="text-slate-600 text-lg leading-relaxed">
+          Intelligent solutions for{" "}
+          <span className="text-purple-600 font-medium">
+            modern infrastructure inspection
+          </span>
         </p>
       </div>
+
 
       <StackedCards />
       <div style={{ height: "100vh" }} />

@@ -50,7 +50,7 @@ export default function StackedCards() {
         cards.forEach((card, i) => {
             gsap.set(card, {
                 y: i === 0 ? 0 : "100%",
-                opacity: i === 0 ? 1 : 0, // 👈 hide unloaded cards
+                opacity: i === 0 ? 1 : 0, // hide unloaded cards
                 zIndex: i + 1,
             })
         })

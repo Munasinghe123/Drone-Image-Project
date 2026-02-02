@@ -35,35 +35,10 @@ function Header() {
               "
             />
             <span className="font-extrabold tracking-widest text-lg text-purple-700">
-              SKY<span className="text-purple-500">EYE</span>
+              LECO
             </span>
           </div>
         </Link>
-
-        <nav className="hidden md:flex items-center gap-20">
-
-          <Link to="/product" className="group">
-            <span className="nav-link">Product</span>
-          </Link>
-
-          <Link to="/solutions" className="group">
-            <span className="nav-link">Solutions</span>
-          </Link>
-
-          <Link to="/how-it-works" className="group">
-            <span className="nav-link">How it works</span>
-          </Link>
-
-          <Link to="/pricing" className="group">
-            <span className="nav-link">Pricing</span>
-          </Link>
-
-          <Link to="/contact" className="group">
-            <span className="nav-link">Contact</span>
-          </Link>
-
-        </nav>
-
 
         {/* CTA */}
         <Link to="/signin">

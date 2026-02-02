@@ -147,7 +147,9 @@ export default function SignIn() {
                                             onChange={(e) => setPassword(e.target.value)}
                                         />
 
-                                        <button className="w-full text-lg py-3 bg-purple-800/90 text-white rounded-md hover:bg-black hover:text-purple-500 transition-colors">Login</button>
+                                        <button
+                                        onClick={() => navigate('/add-images')}
+                                        className="w-full text-lg py-3 bg-purple-800/90 text-white rounded-md hover:bg-black hover:text-purple-500 transition-colors">Login</button>
 
                                         <button
                                             type='submit'

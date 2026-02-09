@@ -1,8 +1,7 @@
 import { forwardRef, useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import StackedCards from '../components/StackedCards'
-import Bg from '../Images/map-bg.png'
+import FeatureOrbit from '../components/FeatureOrbit'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -32,9 +31,9 @@ const Features = forwardRef((props, ref) => {
         sectionRef.current = node
         if (ref) ref.current = node
       }}
-      className="relative overflow-hidden bg-purple-50"
+      className="relative overflow-hidden"
     >
-      
+
       <div
         ref={textRef}
         className="fixed left-10 md:left-20 top-28 z-20 max-w-sm pointer-events-none"
@@ -44,7 +43,7 @@ const Features = forwardRef((props, ref) => {
         </span>
 
         <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-black mb-6">
-          Built for modern <span className='text-purple-700'>inspection </span> 
+          Built for modern <span className='text-purple-700'>inspection </span>
         </h2>
 
         <div className="w-12 h-[2px] bg-black rounded-full mb-6" />
@@ -57,9 +56,7 @@ const Features = forwardRef((props, ref) => {
         </p>
       </div>
 
-
-      <StackedCards />
-      <div style={{ height: "100vh" }} />
+      <FeatureOrbit />
     </section>
   )
 })

@@ -1,0 +1,63 @@
+CREATE DATABASE drone_image_system;
+
+connect to the database = \c drone_image_system
+
+CREATE TABLE images (
+    id SERIAL PRIMARY KEY,
+
+    file_hash TEXT UNIQUE NOT NULL,           -- SHA-256 hash
+    original_filename TEXT NOT NULL,          -- Raw filename
+    raw_path TEXT NOT NULL,                   -- OneDrive raw location
+
+    category VARCHAR(10) NOT NULL
+        CHECK (category IN ('POLE', 'LINE')),
+
+    start_pole TEXT,                          -- For line sections
+    end_pole TEXT,                            -- For line sections
+    pole_id TEXT,                             -- For pole images
+
+    sequence_no INT,                          -- Image order
+    captured_datetime TIMESTAMP,              -- From EXIF (nullable)
+
+    published_path TEXT,                      -- Viewer path (later)
+
+    batch_id INT,                             -- Import batch reference
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE import_batches (
+    batch_id SERIAL PRIMARY KEY,
+
+    source_folder TEXT NOT NULL,          -- Raw upload folder
+    imported_by TEXT NOT NULL,            -- User (or system for now)
+
+    imported_at TIMESTAMP
+        DEFAULT CURRENT_TIMESTAMP,        -- Import time
+
+    total_images INT NOT NULL,             -- Count
+    duplicates_skipped INT DEFAULT 0,      -- Count
+
+    status VARCHAR(15) NOT NULL
+        CHECK (status IN ('IMPORTED', 'PUBLISHED'))
+);
+
+
+\d images
+\d import_batches 
+
+
+ALTER TABLE images
+ADD COLUMN survey_date DATE;
+
+
+
+
+
+
+
+
+
+
+
+

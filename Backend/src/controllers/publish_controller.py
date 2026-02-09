@@ -23,13 +23,8 @@ def publish_batch(batch_id):
         conn.close()
         return
 
-    source_folder = Path(batch[0])
 
-    # Extract survey folder name from raw path
-    survey_name = source_folder.parents[1].name  # Survey_YYYY_MM_DD
-
-    # Published root at SAME LEVEL as Raw_Drone_Uploads
-    published_survey_dir = PUBLISHED_DIR / survey_name
+    published_root = PUBLISHED_DIR
 
     # Fetch images in correct order
     cur.execute(
@@ -64,12 +59,12 @@ def publish_batch(batch_id):
         raw_path = Path(raw_path)
 
         if category == "POLE":
-            dest_dir = published_survey_dir / "Poles" / pole_id
+            dest_dir = published_root / "Poles" / pole_id
             new_name = f"{pole_id}_{index:02d}{raw_path.suffix}"
 
         else:  # LINE
             section = f"{start_pole}_{end_pole}"
-            dest_dir = published_survey_dir / "LineSections" / section
+            dest_dir = published_root / "LineSections" / section
             new_name = f"{section}_{index:02d}{raw_path.suffix}"
 
         published_path = copy_and_rename(

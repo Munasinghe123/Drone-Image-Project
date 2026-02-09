@@ -1,5 +1,5 @@
 from datetime import date
-from config.folder_creation_helper import get_or_create_today_survey
+from config.folder_creation_helper import get_raw_uploads_root
 from controllers.db_batch_controller import create_import_batch, update_duplicates_skipped
 from controllers.db_image_controller import insert_image_record
 from utils.hash_helper import compute_sha256
@@ -30,7 +30,7 @@ def upload_line_images(request):
         }
 
     #  Get or create today's survey
-    survey_dir = get_or_create_today_survey()
+    survey_dir = get_raw_uploads_root()
 
     #  Create line section folder (PDF-defined)
     line_folder_name = f"{start_pole_code}_{end_pole_code}"
@@ -99,7 +99,6 @@ def upload_line_images(request):
         "status": 200,
         "body": {
             "message": "Line images uploaded successfully",
-            "survey": survey_dir.name,
             "lineSection": line_folder_name,
             "batch_id": batch_id,
             "duplicatesSkipped": duplicates_skipped,

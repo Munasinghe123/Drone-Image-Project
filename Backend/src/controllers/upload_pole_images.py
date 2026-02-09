@@ -1,5 +1,5 @@
 from config.db import get_db_connection
-from config.folder_creation_helper import get_or_create_today_survey
+from config.folder_creation_helper import get_raw_uploads_root
 from controllers.db_image_controller import insert_image_record
 from controllers.db_batch_controller import create_import_batch
 from datetime import date
@@ -17,8 +17,8 @@ def upload_pole_images(request):
             "body": {"error": "poleCode and files are required"}
         }
 
-    survey_dir = get_or_create_today_survey()
-    pole_dir = survey_dir / "Poles" / pole_code
+    raw_root = get_raw_uploads_root()
+    pole_dir = raw_root / "Poles" / pole_code
     pole_dir.mkdir(parents=True, exist_ok=True)
 
     #  Create NEW batch (IMPORTANT)

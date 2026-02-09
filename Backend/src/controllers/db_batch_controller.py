@@ -16,7 +16,7 @@ def create_import_batch(source_folder, imported_by, total_images):
         VALUES (%s, %s, %s, %s)
         RETURNING batch_id
         """,
-        (source_folder, imported_by, total_images, "IMPORTED")
+        (source_folder, imported_by, total_images, "IMPORTING")
     )
 
     batch_id = cur.fetchone()[0]

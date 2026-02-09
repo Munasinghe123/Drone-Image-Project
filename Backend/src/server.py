@@ -2,6 +2,9 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 import cgi
 from routes.survey_routes import ROUTES
+import threading
+from publish.publish_engine import run_publish_engine
+
 
 
 class RequestHandler(BaseHTTPRequestHandler):
@@ -44,7 +47,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             for key in form.keys():
                 field = form[key]
 
-                # 🔹 Multiple files with same field name
+                # Multiple files with same field name
                 if isinstance(field, list):
                     for item in field:
                         if item.filename:
@@ -53,7 +56,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                                 "file": item.file.read()
                             })
                 else:
-                    # 🔹 Single field
+                    # Single field
                     if field.filename:
                         request["files"].append({
                             "filename": field.filename,
@@ -81,6 +84,16 @@ class RequestHandler(BaseHTTPRequestHandler):
 
 
 def run_server():
+    # Start publish engine in background
+    publish_thread = threading.Thread(
+        target=run_publish_engine,
+        daemon=True
+    )
+    publish_thread.start()
+
+    print(" Publish engine started in background")
+
     server = HTTPServer(("localhost", 8000), RequestHandler)
     print("Server running on http://localhost:8000")
     server.serve_forever()
+

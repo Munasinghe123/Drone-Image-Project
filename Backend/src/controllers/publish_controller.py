@@ -46,26 +46,26 @@ def publish_batch(batch_id):
     images = cur.fetchall()
 
     # Publish each image
-    for index, (
+    for (
         image_id,
         raw_path,
         category,
         pole_id,
         start_pole,
         end_pole,
-        _
-    ) in enumerate(images, start=1):
+        sequence_no
+    ) in images:
 
         raw_path = Path(raw_path)
 
         if category == "POLE":
             dest_dir = published_root / "Poles" / pole_id
-            new_name = f"{pole_id}_{index:02d}{raw_path.suffix}"
+            new_name = f"{pole_id}_{sequence_no:02d}{raw_path.suffix}"
 
         else:  # LINE
             section = f"{start_pole}_{end_pole}"
             dest_dir = published_root / "LineSections" / section
-            new_name = f"{section}_{index:02d}{raw_path.suffix}"
+            new_name = f"{section}_{sequence_no:02d}{raw_path.suffix}"
 
         published_path = copy_and_rename(
             raw_path,

@@ -5,65 +5,104 @@ from controllers.db_image_controller import insert_image_record
 from utils.hash_helper import compute_sha256
 from config.db import get_db_connection
 
+
 def upload_line_images(request):
-    #  Validate input
+    # Validate input
     start_pole_code = request["form"].get("startPoleCode")
     end_pole_code = request["form"].get("endPoleCode")
     files = request["files"]
 
     if not start_pole_code:
-        return {
-            "status": 400,
-            "body": {"error": "startPoleCode is required"}
-        }
+        return {"status": 400, "body": {"error": "startPoleCode is required"}}
 
     if not end_pole_code:
-        return {
-            "status": 400,
-            "body": {"error": "endPoleCode is required"}
-        }
+        return {"status": 400, "body": {"error": "endPoleCode is required"}}
 
     if not files:
-        return {
-            "status": 400,
-            "body": {"error": "No files uploaded"}
-        }
+        return {"status": 400, "body": {"error": "No files uploaded"}}
 
-    #  Get or create today's survey
+    # Normalize codes
+    start_pole_code = start_pole_code.strip().upper()
+    end_pole_code = end_pole_code.strip().upper()
+
     survey_dir = get_raw_uploads_root()
-
-    #  Create line section folder (PDF-defined)
     line_folder_name = f"{start_pole_code}_{end_pole_code}"
     line_dir = survey_dir / "LineSections" / line_folder_name
+
+    # Get last sequence number
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT COALESCE(MAX(sequence_no), 0)
+        FROM images
+        WHERE category = 'LINE'
+        AND UPPER(start_pole) = %s
+        AND UPPER(end_pole) = %s
+    """, (start_pole_code, end_pole_code))
+
+    last_sequence = cur.fetchone()[0]
+
+    cur.close()
+    conn.close()
+
+    survey_date = date.today()
+    duplicates_skipped = 0
+    valid_files = []
+
+    # FIRST PASS — detect valid (non-duplicate) files only
+    for index, file in enumerate(files, start=last_sequence + 1):
+
+        file_hash = compute_sha256(file["file"])
+
+        # Check if file already exists globally
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        cur.execute(
+            "SELECT 1 FROM images WHERE file_hash = %s",
+            (file_hash,)
+        )
+
+        exists = cur.fetchone()
+
+        cur.close()
+        conn.close()
+
+        if exists:
+            duplicates_skipped += 1
+        else:
+            raw_path = line_dir / file["filename"]
+            valid_files.append((file, raw_path, index, file_hash))
+
+    # If ALL files are duplicates → stop here
+    if not valid_files:
+        return {
+            "status": 400,
+            "body": {
+                "message": "All uploaded images are duplicates. Nothing saved."
+            }
+        }
+
+    # Create folder ONLY if needed
     line_dir.mkdir(parents=True, exist_ok=True)
 
-    #  Create import batch
+    # Create batch ONLY if needed
     batch_id = create_import_batch(
         source_folder=str(line_dir),
         imported_by="system",
-        total_images=len(files)
+        total_images=len(valid_files)
     )
 
-    duplicates_skipped = 0
     saved_files = []
-    survey_date = date.today()
 
-    #  Save files + insert DB records
-    for index, file in enumerate(files, start=1):
-        file_path = line_dir / file["filename"]
+    # SECOND PASS — insert + save valid files
+    for file, raw_path, index, file_hash in valid_files:
 
-        # Save raw file
-        with open(file_path, "wb") as f:
-            f.write(file["file"])
-
-        # Compute hash
-        file_hash = compute_sha256(file["file"])
-
-        # Insert DB record
-        inserted = insert_image_record(
+        insert_image_record(
             file_hash=file_hash,
             original_filename=file["filename"],
-            raw_path=str(file_path),
+            raw_path=str(raw_path),
             category="LINE",
             survey_date=survey_date,
             batch_id=batch_id,
@@ -72,29 +111,27 @@ def upload_line_images(request):
             sequence_no=index
         )
 
-        if not inserted:
-            duplicates_skipped += 1
+        with open(raw_path, "wb") as f:
+            f.write(file["file"])
 
         saved_files.append(file["filename"])
-        
+
+    # Mark batch as imported
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute(
-        """
+
+    cur.execute("""
         UPDATE import_batches
         SET status = 'IMPORTED'
         WHERE batch_id = %s
-        """,
-        (batch_id,)
-    )
+    """, (batch_id,))
+
     conn.commit()
     cur.close()
     conn.close()
 
-    #  Update batch duplicates
     update_duplicates_skipped(batch_id, duplicates_skipped)
 
-    #  Response
     return {
         "status": 200,
         "body": {

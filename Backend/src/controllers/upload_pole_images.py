@@ -20,6 +20,22 @@ def upload_pole_images(request):
     raw_root = get_raw_uploads_root()
     pole_dir = raw_root / "Poles" / pole_code
     pole_dir.mkdir(parents=True, exist_ok=True)
+    
+    # checks ALL batches for a given pole
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT COALESCE(MAX(sequence_no), 0)
+        FROM images
+        WHERE category = 'POLE'
+        AND UPPER(pole_id) = %s
+    """, (pole_code.upper(),))
+
+    last_sequence = cur.fetchone()[0]
+
+    cur.close()
+    conn.close()
 
     #  Create NEW batch (IMPORTANT)
     batch_id = create_import_batch(
@@ -30,18 +46,22 @@ def upload_pole_images(request):
 
     today = date.today()
     saved_files = []
+    
+    duplicates_skipped = 0
 
-    #  THIS LOOP IS THE KEY FIX
-    for index, file in enumerate(files, start=1):
-        raw_path = pole_dir / file["filename"]
+    today = date.today()
+    saved_files = []
+    duplicates_skipped = 0
+    valid_files = []
 
-        with open(raw_path, "wb") as f:
-            f.write(file["file"])
+# First pass: check duplicates only
+    for index, file in enumerate(files, start=last_sequence + 1):
 
-        # hash per file
         file_hash = hashlib.sha256(file["file"]).hexdigest()
 
-        insert_image_record(
+        raw_path = pole_dir / file["filename"]
+
+        inserted = insert_image_record(
             file_hash=file_hash,
             original_filename=file["filename"],
             raw_path=str(raw_path),
@@ -52,6 +72,35 @@ def upload_pole_images(request):
             sequence_no=index
         )
 
+        if not inserted:
+            duplicates_skipped += 1
+        else:
+            valid_files.append((file, raw_path))
+
+    # If NO valid files → delete batch + return
+    if not valid_files:
+        # Optional: delete empty batch record
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM import_batches WHERE batch_id = %s", (batch_id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return {
+            "status": 400,
+            "body": {
+                "message": "All uploaded images are duplicates. Nothing saved."
+            }
+        }
+
+    # Create folder only now
+    pole_dir.mkdir(parents=True, exist_ok=True)
+
+    # Save only valid files
+    for file, raw_path in valid_files:
+        with open(raw_path, "wb") as f:
+            f.write(file["file"])
         saved_files.append(file["filename"])
         
     conn = get_db_connection()

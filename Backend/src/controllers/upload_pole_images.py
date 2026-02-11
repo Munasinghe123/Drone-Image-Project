@@ -3,7 +3,6 @@ from config.folder_creation_helper import get_raw_uploads_root
 from controllers.db_image_controller import insert_image_record
 from controllers.db_batch_controller import create_import_batch
 from datetime import date
-from pathlib import Path
 import hashlib
 
 
@@ -17,11 +16,12 @@ def upload_pole_images(request):
             "body": {"error": "poleCode and files are required"}
         }
 
+    pole_code = pole_code.strip().upper()
+
     raw_root = get_raw_uploads_root()
     pole_dir = raw_root / "Poles" / pole_code
-    pole_dir.mkdir(parents=True, exist_ok=True)
-    
-    # checks ALL batches for a given pole
+
+    # Get last sequence number
     conn = get_db_connection()
     cur = conn.cursor()
 
@@ -30,63 +30,50 @@ def upload_pole_images(request):
         FROM images
         WHERE category = 'POLE'
         AND UPPER(pole_id) = %s
-    """, (pole_code.upper(),))
+    """, (pole_code,))
 
     last_sequence = cur.fetchone()[0]
 
     cur.close()
     conn.close()
 
-    #  Create NEW batch (IMPORTANT)
-    batch_id = create_import_batch(
-        source_folder=str(pole_dir),
-        imported_by="system",
-        total_images=len(files)
-    )
-
     today = date.today()
-    saved_files = []
-    
+    current_sequence = last_sequence
     duplicates_skipped = 0
-
-    today = date.today()
     saved_files = []
-    duplicates_skipped = 0
-    valid_files = []
+    new_files_exist = False
 
-# First pass: check duplicates only
-    for index, file in enumerate(files, start=last_sequence + 1):
+    # First pass — detect duplicates and prepare inserts
+    file_data_list = []
 
+    for file in files:
         file_hash = hashlib.sha256(file["file"]).hexdigest()
 
-        raw_path = pole_dir / file["filename"]
-
-        inserted = insert_image_record(
-            file_hash=file_hash,
-            original_filename=file["filename"],
-            raw_path=str(raw_path),
-            category="POLE",
-            survey_date=today,
-            batch_id=batch_id,
-            pole_id=pole_code,
-            sequence_no=index
-        )
-
-        if not inserted:
-            duplicates_skipped += 1
-        else:
-            valid_files.append((file, raw_path))
-
-    # If NO valid files → delete batch + return
-    if not valid_files:
-        # Optional: delete empty batch record
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("DELETE FROM import_batches WHERE batch_id = %s", (batch_id,))
-        conn.commit()
+        cur.execute("SELECT 1 FROM images WHERE file_hash = %s", (file_hash,))
+        exists = cur.fetchone()
         cur.close()
         conn.close()
 
+        if exists:
+            duplicates_skipped += 1
+            continue
+
+        new_files_exist = True
+        current_sequence += 1
+
+        raw_path = pole_dir / file["filename"]
+
+        file_data_list.append((
+            file,
+            file_hash,
+            raw_path,
+            current_sequence
+        ))
+
+    # If ALL files are duplicates → stop here
+    if not new_files_exist:
         return {
             "status": 400,
             "body": {
@@ -94,25 +81,45 @@ def upload_pole_images(request):
             }
         }
 
-    # Create folder only now
+    # Create folder only if needed
     pole_dir.mkdir(parents=True, exist_ok=True)
 
-    # Save only valid files
-    for file, raw_path in valid_files:
+    # Create batch only if needed
+    batch_id = create_import_batch(
+        source_folder=str(pole_dir),
+        imported_by="system",
+        total_images=len(file_data_list)
+    )
+
+    # Insert + save valid files
+    for file, file_hash, raw_path, sequence_no in file_data_list:
+
+        insert_image_record(
+            file_hash=file_hash,
+            original_filename=file["filename"],
+            raw_path=str(raw_path),
+            category="POLE",
+            survey_date=today,
+            batch_id=batch_id,
+            pole_id=pole_code,
+            sequence_no=sequence_no
+        )
+
         with open(raw_path, "wb") as f:
             f.write(file["file"])
+
         saved_files.append(file["filename"])
-        
+
+    # Mark batch as imported
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute(
-        """
+
+    cur.execute("""
         UPDATE import_batches
         SET status = 'IMPORTED'
         WHERE batch_id = %s
-        """,
-        (batch_id,)
-    )
+    """, (batch_id,))
+
     conn.commit()
     cur.close()
     conn.close()
@@ -122,6 +129,7 @@ def upload_pole_images(request):
         "body": {
             "message": "Pole images uploaded successfully",
             "batch_id": batch_id,
-            "filesSaved": saved_files
+            "filesSaved": saved_files,
+            "duplicatesSkipped": duplicates_skipped
         }
     }

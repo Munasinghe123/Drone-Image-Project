@@ -33,7 +33,7 @@ def insert_image_record(
                 sequence_no
             )
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            ON CONFLICT (file_hash, batch_id) DO NOTHING
+            ON CONFLICT (file_hash) DO NOTHING
             """,
             (
                 file_hash,

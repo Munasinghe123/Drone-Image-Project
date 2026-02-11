@@ -50,6 +50,9 @@ CREATE TABLE import_batches (
 ALTER TABLE images
 ADD COLUMN survey_date DATE;
 
+ALTER TABLE images
+ADD CONSTRAINT unique_file_hash UNIQUE (file_hash);
+
 
 
 

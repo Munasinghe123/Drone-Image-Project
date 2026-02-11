@@ -96,8 +96,11 @@ function AddImages() {
             setPoleCode("");
 
         } catch (err) {
-            console.error("Error uploading pole images:", err);
-            alert("Upload failed");
+            if (err.response && err.response.data && err.response.data.message) {
+                alert(err.response.data.message);
+            } else {
+                alert("Upload failed");
+            }
         }
     };
 
@@ -143,8 +146,11 @@ function AddImages() {
             setEndPoleCode("");
 
         } catch (err) {
-            console.error("Error uploading line images:", err);
-            alert("Line image upload failed");
+            if (err.response && err.response.data && err.response.data.message) {
+                alert(err.response.data.message);
+            } else {
+                alert("Upload failed");
+            }
         }
     };
 
